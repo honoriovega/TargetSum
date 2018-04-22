@@ -12,6 +12,8 @@ static propTypes = {
   id: PropTypes.number.isRequired
 }
 handlPress = () =>  {
+
+  if(this.props.isDisabled){return;}
   // console.log(this.props.number);
   this.props.onPress(this.props.id)
 }
@@ -40,12 +42,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
 
   },
-
   disabled : {
       opacity : 0.3,
   }
-
-
 }
 )
 

@@ -2,39 +2,58 @@ import React from 'react';
 import {View,Text,StyleSheet} from 'react-native';
 import PropTypes from 'prop-types';
 import RandomNumber from './RandomNumber';
+
 class Game extends React.Component {
 
   static propTypes = {
     randomNumberCount : PropTypes.number.isRequired,
-
   }
 
   state = {
-    selectedNumbers : [],
+    selectedIds : [],
   }
 
   isNumberSelected = (numberIndex) => {
-    return this.state.selectedNumbers.indexOf(numberIndex) >= 0;
+    return this.state.selectedIds.indexOf(numberIndex) >= 0;
   }
-
 
   randomNumbers = Array.from({ length : this.props.randomNumberCount})
                           .map( () => 1 +  Math.floor(10 * Math.random()))
 
   target = this.randomNumbers.slice(0,this.props.randomNumberCount - 2)
-
-  // this.props.randomNumberCount
+           .reduce( (acc,curr) => acc + curr,0)
 
   selectNumber = (numberIndex) => {
     this.setState( (prevState) => {
-      return {selectedNumbers : [...prevState.selectedNumbers,numberIndex]}
+      return {selectedIds : [...prevState.selectedIds,numberIndex]}
     });
   }
 
+  gameStatus = () => {
+    const sumSelected = this.state.selectedIds.reduce( (acc,curr) => {
+      return acc + this.randomNumbers[curr]
+    },0)
+    console.log(sumSelected)
+    if(sumSelected < this.target){
+      return 'PLAYING';
+    }
+    if(sumSelected === this.target) {
+      return 'WON';
+    }
+    else {
+      return 'LOST';
+    }
+
+  }
+
+
   render() {
+
+    // add up all the numbers in the slice
+    const gameStatus = this.gameStatus();
     return (
         <View style={styles.container}>
-          <Text style={styles.target}>{this.target}</Text>
+          <Text style={[styles.target,styles[`STATUS_${gameStatus}`]]}>{this.target}</Text>
 
 
           <View style={styles.randomContainer}>
@@ -44,13 +63,13 @@ class Game extends React.Component {
               id={index}
               number={randomNumber}
               onPress={this.selectNumber}
-              isDisabled={this.isNumberSelected(index)}
+              isDisabled={this.isNumberSelected(index) || gameStatus !== 'PLAYING'}
             />
-            // <Text style={styles.random} key={index}>{randomNumber}</Text>
 
           )}
 
           </View>
+          <Text>{this.gameStatus()}</Text>
         </View>
     );
   }
@@ -85,6 +104,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#bbb',
     marginHorizontal: 50,
     textAlign: 'center'
+  },
+  STATUS_PLAYING : {
+    backgroundColor: '#bbb'
+  },
+  STATUS_WON : {
+    backgroundColor: 'green'
+  },
+  STATUS_LOST: {
+    backgroundColor: 'red'
   }
 }
 )
